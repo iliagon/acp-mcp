@@ -2,7 +2,8 @@
 
 **Control ACP coding agents programmatically through MCP.**
 
-`acp-mcp` lets any MCP-capable host launch and control ACP-compatible coding agents as stateful workers.
+`acp-mcp` lets any MCP-capable host launch and control ACP-compatible coding
+agents as stateful workers.
 
 Use it to:
 
@@ -29,42 +30,56 @@ acp-mcp
    +--> ACP agent session --> model/provider
 ```
 
-Each downstream agent talks to its own model or provider. `acp-mcp` is the control layer. It does not provide models, accounts, credentials, or orchestration policy.
+Each downstream agent talks to its own model or provider. `acp-mcp` is the
+control layer. It does not provide models, accounts, credentials, or
+orchestration policy.
 
-> `acp-mcp` is a control plane, not a scheduler. The parent host decides what to delegate, when to run it, and whether work should run concurrently.
+> `acp-mcp` is a control plane, not a scheduler. The parent host decides what to
+> delegate, when to run it, and whether work should run concurrently.
 
 ## Why use it?
 
-A shell command is enough for simple delegation, but it usually reduces an agent to a one-shot subprocess.
+A shell command is enough for simple delegation, but it usually reduces an agent
+to a one-shot subprocess.
 
-Headless CLI modes can also differ from the agent's interactive or ACP interface. They may expose fewer models, use different defaults, flatten structured events into stdout, or make multi-turn continuation awkward.
+Headless CLI modes can also differ from the agent's interactive or ACP
+interface. They may expose fewer models, use different defaults, flatten
+structured events into stdout, or make multi-turn continuation awkward.
 
-ACP provides a structured session protocol for coding agents. MCP provides a structured tool interface for hosts. `acp-mcp` bridges the two.
+ACP provides a structured session protocol for coding agents. MCP provides a
+structured tool interface for hosts. `acp-mcp` bridges the two.
 
-That gives the parent agent a long-lived, inspectable, controllable worker instead of only a command to execute.
+That gives the parent agent a long-lived, inspectable, controllable worker
+instead of only a command to execute.
 
 ## Quick start
 
 ### 1. Install `acp-mcp`
 
-Published builds are available from [GitHub Releases](https://github.com/kxress/acp-mcp/releases).
+Published builds are available from
+[GitHub Releases](https://github.com/kxress/acp-mcp/releases).
 
 Release packages are built for:
 
-| Platform | Target |
-| --- | --- |
-| Windows | x86_64 |
-| Linux | x86_64 |
-| macOS | ARM64 / Apple Silicon |
+| Platform | Target                |
+| -------- | --------------------- |
+| Windows  | x86_64                |
+| Linux    | x86_64                |
+| macOS    | ARM64 / Apple Silicon |
 
-Each release package contains the native executable, the `acp-mcp` WTFPL license, third-party notices and applicable license texts, and an embedded manifest. GitHub Releases also publish a SHA-256 sidecar for each archive and a manifest containing the archive and executable hashes.
+Each release package contains the native executable, the `acp-mcp` WTFPL
+license, third-party notices and applicable license texts, and an embedded
+manifest. GitHub Releases also publish a SHA-256 sidecar for each archive and a
+manifest containing the archive and executable hashes.
 
-The release workflow publishes only when the tag version matches `src/version.ts` and all native builds and smoke tests pass.
+The release workflow publishes only when the tag version matches
+`src/version.ts` and all native builds and smoke tests pass.
 
 <details>
 <summary><strong>Windows x86_64</strong></summary>
 
-Download the ZIP, checksum, and manifest. Verify the archive, then extract it to a stable application directory:
+Download the ZIP, checksum, and manifest. Verify the archive, then extract it to
+a stable application directory:
 
 ```powershell
 $version = "0.2.4"
@@ -83,14 +98,16 @@ Expand-Archive -LiteralPath $archive -DestinationPath $install -Force
 & (Join-Path $install "acp-mcp.exe") --version
 ```
 
-An absolute executable path is the most predictable choice when you register the server with an MCP host.
+An absolute executable path is the most predictable choice when you register the
+server with an MCP host.
 
 </details>
 
 <details>
 <summary><strong>Linux x86_64</strong></summary>
 
-Download the tarball, checksum, and manifest. Verify and extract the package, then install the executable in your user-local bin directory:
+Download the tarball, checksum, and manifest. Verify and extract the package,
+then install the executable in your user-local bin directory:
 
 ```sh
 version=0.2.4
@@ -113,7 +130,8 @@ install -m 0755 \
 <details>
 <summary><strong>macOS ARM64</strong></summary>
 
-Download the tarball, checksum, and manifest. Verify and extract the package, then install the executable in your user-local bin directory:
+Download the tarball, checksum, and manifest. Verify and extract the package,
+then install the executable in your user-local bin directory:
 
 ```sh
 version=0.2.4
@@ -135,27 +153,32 @@ The macOS binary is unsigned and not notarized.
 
 </details>
 
-The repository installer can also install from a directory that contains the release archive, checksum, and target manifest:
+The repository installer can also install from a directory that contains the
+release archive, checksum, and target manifest:
 
 ```sh
 deno task install --release-dir ./acp-mcp-release-assets
 ```
 
-It verifies the archive and embedded executable before it replaces the installed binary.
+It verifies the archive and embedded executable before it replaces the installed
+binary.
 
 Default install locations:
 
-| Platform | Default |
-| --- | --- |
-| Windows | `%LOCALAPPDATA%\Programs\acp-mcp` |
-| Linux | `$HOME/.local/bin/acp-mcp` |
-| macOS | `$HOME/.local/bin/acp-mcp` |
+| Platform | Default                           |
+| -------- | --------------------------------- |
+| Windows  | `%LOCALAPPDATA%\Programs\acp-mcp` |
+| Linux    | `$HOME/.local/bin/acp-mcp`        |
+| macOS    | `$HOME/.local/bin/acp-mcp`        |
 
-On Linux and macOS, the installer reports when `$HOME/.local/bin` is not on `PATH`. It does not modify shell configuration.
+On Linux and macOS, the installer reports when `$HOME/.local/bin` is not on
+`PATH`. It does not modify shell configuration.
 
-The installed executable is native. Deno, mise, and the source checkout are not required at runtime.
+The installed executable is native. Deno, mise, and the source checkout are not
+required at runtime.
 
-> SHA-256 verifies downloaded bytes against a known hash. It does not authenticate the publisher.
+> SHA-256 verifies downloaded bytes against a known hash. It does not
+> authenticate the publisher.
 
 ### 2. Register it with your MCP host
 
@@ -196,11 +219,14 @@ list_models
 
 `list_agents` reports the effective agent definitions.
 
-`list_models` asks a live ACP implementation what it currently advertises, including its available models and configuration.
+`list_models` asks a live ACP implementation what it currently advertises,
+including its available models and configuration.
 
-This is important because an agent's interactive UI, CLI mode, headless mode, and ACP interface can expose different model catalogs or configuration options.
+This is important because an agent's interactive UI, CLI mode, headless mode,
+and ACP interface can expose different model catalogs or configuration options.
 
-The live ACP advertisement is the source of truth. `acp-mcp` cannot invent a model or bypass restrictions imposed by the downstream implementation.
+The live ACP advertisement is the source of truth. `acp-mcp` cannot invent a
+model or bypass restrictions imposed by the downstream implementation.
 
 ### 4. Delegate work
 
@@ -239,11 +265,13 @@ parent agent
   +--> use result
 ```
 
-`run_task` uses the requested agent and model selection. If that request fails, it does not silently switch implementations, models, or ACP protocol versions.
+`run_task` uses the requested agent and model selection. If that request fails,
+it does not silently switch implementations, models, or ACP protocol versions.
 
 ## Managed sessions
 
-Use a managed session when the interaction itself matters or when work needs more than one turn.
+Use a managed session when the interaction itself matters or when work needs
+more than one turn.
 
 ```text
 start_session
@@ -270,15 +298,19 @@ A managed session lets the parent:
 - resume supported downstream sessions
 - close the session explicitly
 
-Use `run_task` when one request and one result are enough. Use a managed session when you need session control.
+Use `run_task` when one request and one result are enough. Use a managed session
+when you need session control.
 
 `acp-mcp` keeps up to eight managed sessions per server process.
 
-Bridge session state and event journals are process-local. A downstream session may still be resumable after `acp-mcp` restarts when that ACP implementation supports session resume.
+Bridge session state and event journals are process-local. A downstream session
+may still be resumable after `acp-mcp` restarts when that ACP implementation
+supports session resume.
 
 ### Parallel agents
 
-Managed sessions are independent. A parent can coordinate several specialists at once:
+Managed sessions are independent. A parent can coordinate several specialists at
+once:
 
 ```text
 Codex
@@ -292,18 +324,20 @@ Codex
 
 This works best when delegated tasks are independent enough to run concurrently.
 
-`acp-mcp` does not schedule, sequence, merge, or reconcile their work automatically. The parent orchestrator owns that logic.
+`acp-mcp` does not schedule, sequence, merge, or reconcile their work
+automatically. The parent orchestrator owns that logic.
 
 ## Supported agents
 
-An agent is an ACP implementation that `acp-mcp` can launch. The model selected inside that agent is a separate choice.
+An agent is an ACP implementation that `acp-mcp` can launch. The model selected
+inside that agent is a separate choice.
 
-| Agent ID | ACP implementation | Notes |
-| --- | --- | --- |
-| `opencode` | OpenCode `opencode acp` | ACP v1 |
-| `codex` | `@agentclientprotocol/codex-acp` | ACP v1 |
-| `claude` | Claude Agent ACP | ACP v1 by default; experimental v2 can be selected explicitly |
-| `antigravity` | Selected Antigravity ACP implementation | Official Google implementation by default |
+| Agent ID      | ACP implementation                      | Notes                                                         |
+| ------------- | --------------------------------------- | ------------------------------------------------------------- |
+| `opencode`    | OpenCode `opencode acp`                 | ACP v1                                                        |
+| `codex`       | `@agentclientprotocol/codex-acp`        | ACP v1                                                        |
+| `claude`      | Claude Agent ACP                        | ACP v1 by default; experimental v2 can be selected explicitly |
+| `antigravity` | Selected Antigravity ACP implementation | Official Google implementation by default                     |
 
 The built-in profiles are convenience presets, not a closed integration list.
 
@@ -323,7 +357,8 @@ Any compatible stdio ACP server can be registered in trusted configuration:
 }
 ```
 
-The custom agent then uses the same generic runtime path as the built-in profiles:
+The custom agent then uses the same generic runtime path as the built-in
+profiles:
 
 ```text
 list_agents
@@ -338,19 +373,21 @@ Defaults:
 - `args`: `[]`
 - `acpProtocol`: `"v1"`
 
-Custom executable definitions belong in trusted home configuration or in an explicit `--config` file.
+Custom executable definitions belong in trusted home configuration or in an
+explicit `--config` file.
 
-Repository configuration cannot introduce arbitrary executable commands, arguments, environment variables, or ACP protocol definitions.
+Repository configuration cannot introduce arbitrary executable commands,
+arguments, environment variables, or ACP protocol definitions.
 
 ## Antigravity implementations
 
 The built-in `antigravity` profile supports three explicit implementations:
 
-| Selector | Implementation | Use when |
-| --- | --- | --- |
-| `official` | Google's `agy_acp_server` | You want the official and default ACP path |
-| `refined` | `simonepri/refined-antigravity-acp` | You want the refined wrapper around the official backend |
-| `agy` | `shubzkothekar/antigravity-acp` | You want the richer dynamic `agy` CLI model catalog |
+| Selector   | Implementation                      | Use when                                                 |
+| ---------- | ----------------------------------- | -------------------------------------------------------- |
+| `official` | Google's `agy_acp_server`           | You want the official and default ACP path               |
+| `refined`  | `simonepri/refined-antigravity-acp` | You want the refined wrapper around the official backend |
+| `agy`      | `shubzkothekar/antigravity-acp`     | You want the richer dynamic `agy` CLI model catalog      |
 
 The default is `official`.
 
@@ -397,7 +434,9 @@ The default is `official`.
 }
 ```
 
-The tested `agy` path exposed a richer live model catalog, including Opus on the tested account. Actual availability depends on the installed CLI, adapter version, account, and entitlements.
+The tested `agy` path exposed a richer live model catalog, including Opus on the
+tested account. Actual availability depends on the installed CLI, adapter
+version, account, and entitlements.
 
 The pinned `agy` adapter invokes the CLI with:
 
@@ -405,7 +444,8 @@ The pinned `agy` adapter invokes the CLI with:
 --dangerously-skip-permissions
 ```
 
-ACP permission mediation therefore does not protect those operations. The `agy` implementation is intentionally opt-in.
+ACP permission mediation therefore does not protect those operations. The `agy`
+implementation is intentionally opt-in.
 
 </details>
 
@@ -413,15 +453,17 @@ ACP permission mediation therefore does not protect those operations. The `agy` 
 
 `acp-mcp` exposes 16 MCP tools.
 
-| Area | Tools |
-| --- | --- |
-| Discovery | `list_agents`, `list_models` |
-| One-shot delegation | `run_task` |
-| Sessions | `start_session`, `load_session`, `prompt`, `get_events`, `list_sessions`, `get_session`, `close_session` |
-| Configuration and control | `set_config_option`, `set_mode`, `cancel_prompt`, `resolve_permission` |
-| Workspace recovery | `list_stale_workspaces`, `cleanup_stale_workspaces` |
+| Area                      | Tools                                                                                                    |
+| ------------------------- | -------------------------------------------------------------------------------------------------------- |
+| Discovery                 | `list_agents`, `list_models`                                                                             |
+| One-shot delegation       | `run_task`                                                                                               |
+| Sessions                  | `start_session`, `load_session`, `prompt`, `get_events`, `list_sessions`, `get_session`, `close_session` |
+| Configuration and control | `set_config_option`, `set_mode`, `cancel_prompt`, `resolve_permission`                                   |
+| Workspace recovery        | `list_stale_workspaces`, `cleanup_stale_workspaces`                                                      |
 
-Capabilities vary between downstream ACP implementations. Discover what the selected agent advertises instead of assuming that every tool, mode, or configuration option maps to every agent.
+Capabilities vary between downstream ACP implementations. Discover what the
+selected agent advertises instead of assuming that every tool, mode, or
+configuration option maps to every agent.
 
 ## Configuration
 
@@ -431,7 +473,8 @@ Configuration files are named:
 .acp-mcp.json
 ```
 
-Without `--config`, `acp-mcp` discovers configuration from the operation's working directory and merges it from less specific to more specific locations.
+Without `--config`, `acp-mcp` discovers configuration from the operation's
+working directory and merges it from less specific to more specific locations.
 
 Conceptually:
 
@@ -464,7 +507,9 @@ Windows: %USERPROFILE%\.acp-mcp.json
 POSIX:   $HOME/.acp-mcp.json
 ```
 
-A session captures its effective configuration when it starts or loads. Editing `.acp-mcp.json` changes new operations and new sessions, not a session that is already running.
+A session captures its effective configuration when it starts or loads. Editing
+`.acp-mcp.json` changes new operations and new sessions, not a session that is
+already running.
 
 ### Exact config mode
 
@@ -474,7 +519,8 @@ Use:
 acp-mcp --config <path>
 ```
 
-When `--config` is supplied, only that file is loaded. Home configuration and project discovery are skipped.
+When `--config` is supplied, only that file is loaded. Home configuration and
+project discovery are skipped.
 
 The legacy location:
 
@@ -482,7 +528,8 @@ The legacy location:
 %APPDATA%\acp-mcp\config.json
 ```
 
-is not loaded implicitly. A current-schema file at that location can still be selected explicitly with `--config`.
+is not loaded implicitly. A current-schema file at that location can still be
+selected explicitly with `--config`.
 
 ## Project configuration trust boundary
 
@@ -502,15 +549,21 @@ env
 acpProtocol
 ```
 
-Executable launch configuration belongs in trusted home configuration or an explicit `--config` file.
+Executable launch configuration belongs in trusted home configuration or an
+explicit `--config` file.
 
-This prevents entering a repository from implicitly trusting executable definitions stored inside that repository.
+This prevents entering a repository from implicitly trusting executable
+definitions stored inside that repository.
 
 ## Model policy
 
-Different agents expose unrelated model IDs. `acp-mcp` lets an orchestration layer request normalized model sizes and thinking effort instead of hardcoding provider-specific IDs everywhere.
+Different agents expose unrelated model IDs. `acp-mcp` lets an orchestration
+layer request normalized model sizes and thinking effort instead of hardcoding
+provider-specific IDs everywhere.
 
-Configuration follows the operation's working directory, so one MCP server can use different defaults and restrictions for different repositories or subprojects.
+Configuration follows the operation's working directory, so one MCP server can
+use different defaults and restrictions for different repositories or
+subprojects.
 
 ### Model size
 
@@ -523,7 +576,8 @@ large
 xlarge
 ```
 
-These values represent configured positions within a model family. They are not universal capability rankings.
+These values represent configured positions within a model family. They are not
+universal capability rankings.
 
 For example:
 
@@ -534,7 +588,8 @@ large  -> Opus / Sol position
 xlarge -> Fable / Astra position
 ```
 
-`acp-mcp` does not infer these relationships from model names. You configure them explicitly.
+`acp-mcp` does not infer these relationships from model names. You configure
+them explicitly.
 
 ### Thinking effort
 
@@ -550,14 +605,16 @@ max
 ultra
 ```
 
-The requested effort is projected onto the effort levels actually available for the selected model.
+The requested effort is projected onto the effort levels actually available for
+the selected model.
 
 Resolution rules:
 
 1. If the exact requested level exists, use it.
 2. Otherwise, use the highest available level that does not exceed the request.
 3. If no available level is that low, use the model's lowest available level.
-4. `off` means zero effort when the model supports it. Otherwise it resolves to the lowest available level.
+4. `off` means zero effort when the model supports it. Otherwise it resolves to
+   the lowest available level.
 
 Examples:
 
@@ -572,7 +629,8 @@ model has no off:                off    -> lowest available
 available low, high:             medium -> low
 ```
 
-Configured effort mappings are intersected with model choices advertised by the live ACP implementation.
+Configured effort mappings are intersected with model choices advertised by the
+live ACP implementation.
 
 `max` and `ultra` use the same ordered projection rules as every other level.
 
@@ -612,7 +670,8 @@ Configured effort mappings are intersected with model choices advertised by the 
 }
 ```
 
-If `claude-opus-5-5-high` is the highest configured `large` variant currently advertised by the ACP implementation, `large + max` resolves to it.
+If `claude-opus-5-5-high` is the highest configured `large` variant currently
+advertised by the ACP implementation, `large + max` resolves to it.
 
 If a mapped model is not advertised or is denied by policy, selection fails.
 
@@ -636,7 +695,8 @@ Allow and deny policy applies at every level.
 
 ACP v1 is the default and mature path.
 
-ACP v2 is experimental and must be selected explicitly in trusted agent configuration:
+ACP v2 is experimental and must be selected explicitly in trusted agent
+configuration:
 
 ```json
 {
@@ -679,7 +739,9 @@ It does not:
 
 ## Claude Agent ACP through Codex
 
-When Claude Agent ACP uses an externally configured Anthropic-compatible route, Codex must explicitly forward the relevant environment variable names to the MCP subprocess:
+When Claude Agent ACP uses an externally configured Anthropic-compatible route,
+Codex must explicitly forward the relevant environment variable names to the MCP
+subprocess:
 
 ```toml
 [mcp_servers.acp_mcp]
@@ -695,22 +757,30 @@ Do not put the secret values themselves in Codex configuration.
 Keep these boundaries in mind:
 
 - `acp-mcp` is a bridge, not a model provider.
-- The live ACP advertisement is the source of truth for models and configuration.
+- The live ACP advertisement is the source of truth for models and
+  configuration.
 - ACP child processes run with the launching user's OS privileges.
-- `permissionPolicy: "read_only"` controls how `acp-mcp` answers ACP permission requests. It is not a filesystem or OS sandbox.
-- Some downstream agents or adapters can perform operations without requesting ACP permission.
-- Session events can contain prompts, filesystem paths, tool data, provider content, and other sensitive information.
+- `permissionPolicy: "read_only"` controls how `acp-mcp` answers ACP permission
+  requests. It is not a filesystem or OS sandbox.
+- Some downstream agents or adapters can perform operations without requesting
+  ACP permission.
+- Session events can contain prompts, filesystem paths, tool data, provider
+  content, and other sensitive information.
 - Provider credentials belong to the downstream agent or provider.
-- There is no automatic fallback between models, implementations, or ACP protocol versions.
-- SHA-256 can verify an artifact against a known hash. It does not authenticate the publisher.
+- There is no automatic fallback between models, implementations, or ACP
+  protocol versions.
+- SHA-256 can verify an artifact against a known hash. It does not authenticate
+  the publisher.
 
-Treat downstream ACP agents with the same care as any local process running under your account.
+Treat downstream ACP agents with the same care as any local process running
+under your account.
 
 ## Development
 
 The repository pins Deno `2.9.6` in `mise.toml`.
 
-Mise is development tooling only. It is not a runtime dependency of the installed executable.
+Mise is development tooling only. It is not a runtime dependency of the
+installed executable.
 
 Common commands:
 
