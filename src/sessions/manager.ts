@@ -677,12 +677,14 @@ export class SessionManager {
 
   getEvents(sessionId: string, afterSequence = 0, limit = 100) {
     const session = this.requireSession(sessionId);
+    const events = session.events.filter((event) =>
+      event.sequence > afterSequence
+    )
+      .slice(0, Math.max(1, Math.min(limit, 500)));
     return {
-      events: session.events.filter((event) => event.sequence > afterSequence)
-        .slice(0, Math.max(1, Math.min(limit, 500))).map((event) =>
-          structuredClone(event)
-        ),
-      nextSequence: session.nextSequence - 1,
+      events: events.map((event) => structuredClone(event)),
+      nextSequence: events.at(-1)?.sequence ??
+        Math.max(afterSequence, session.droppedThrough),
       gap: afterSequence < session.droppedThrough,
       prompt: session.prompt
         ? {

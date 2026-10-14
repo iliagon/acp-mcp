@@ -1208,7 +1208,8 @@ export function createMcpServer(
   server.registerTool(
     "get_events",
     {
-      description: "Read buffered ACP session updates after a sequence cursor",
+      description:
+        "Read buffered ACP session updates after a sequence cursor. Pass nextSequence as afterSequence to read the next page, even when hidden thoughts leave an empty page. An unchanged cursor means there are no newer buffered events. gap reports dropped events.",
       annotations: {
         title: "Get ACP events",
         readOnlyHint: true,
@@ -1219,7 +1220,9 @@ export function createMcpServer(
       inputSchema: {
         sessionId: z.string(),
         afterSequence: z.number().int().min(0).optional(),
-        limit: z.number().int().min(1).max(500).optional(),
+        limit: z.number().int().min(1).max(500).optional().describe(
+          "Maximum journal events scanned before thought filtering",
+        ),
         waitMs: z.number().int().min(0).max(30000).optional(),
         includeRaw: z.boolean().optional(),
         includeThoughts: z.boolean().optional(),
